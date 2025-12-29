@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>みんなの掲示板</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body {
+  font-family: sans-serif;
+  background: #f2f2f2;
+  padding: 20px;
+}
+#setup, #postArea {
+  background: white;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+.post {
+  background: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+img {
+  max-width: 150px;
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<h1>みんなの掲示板</h1>
+
+<div id="setup">
+  <h3>最初の設定</h3>
+  名前：<br>
+  <input id="name"><br><br>
+  アイコン：<br>
+  <input type="file" id="icon" accept="image/*"><br><br>
+  <button onclick="saveUser()">保存</button>
+</div>
+
+<div id="postArea" style="display:none;">
+  <h3>投稿</h3>
+  <textarea id="text" placeholder="書き込み"></textarea><br>
+  <input type="file" id="media" accept="image/*,video/*"><br><br>
+  <button onclick="post()">投稿する</button>
+</div>
+
+<h2>投稿一覧</h2>
+<div id="posts"></div>
+
+<script>
+/* 🔴 ここを書き換える */
+const スパベースURL = "あなたのプロジェクトURL";
+const アノンキー = "あなたのアノンキー";
+
+/* スパベース初期化 */
+const db = supabase.createClient(スパベースURL, アノンキー);
+
+/* 不適切ワード */
+const ダメな言葉 = ["死", "殺", "fuck", "sex"];
+
+/* ユーザー保存 */
+function saveUser() {
+  const 名前 = document.getElementById("name").value;
+  if (!名前) {
+    alert("名前を入れて");
+    return;
+  }
+  for (let w of ダメな言葉) {
+    if (名前.includes(w)) {
+      alert("名前が不適切");
+      return;
+    }
+  }
+  localStorage.setItem("名前", 名前);
+  alert("保存した");
+  表示切り替え();
+}
+
+/* 表示切り替え */
+function 表示切り替え() {
+  if (localStorage.getItem("名前")) {
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("postArea").style.display = "block";
+  }
+}
+
+/* 投稿 */
+async function post() {
+  const 名前 = localStorage.getItem("名前");
+  const 本文 = document.getElementById("text").value;
+
+  for (let w of ダメな言葉) {
+    if (本文.includes(w)) {
+      alert("不適切な内容");
+      return;
+    }
+  }
+
+  await db.from("posts").insert({
+    name: 名前,
+    text: 本文
+  });
+
+  document.getElementById("text").value = "";
+  読み込み();
+}
+
+/* 投稿を読む */
+async function 読み込み() {
+  const { data } = await db.from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const area = document.getElementById("posts");
+  area.innerHTML = "";
+
+  data.forEach(p => {
+    const d = document.createElement("div");
+    d.className = "post";
+    d.innerHTML = `<b>${p.name}</b><br>${p.text || ""}`;
+    area.appendChild(d);
+  });
+}
+
+/* 初期化 */
+表示切り替え();
+読み込み();
+</script>
+
+</body>
+</html>
