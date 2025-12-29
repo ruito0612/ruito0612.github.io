@@ -1,0 +1,90 @@
+<script>
+const guns = [
+ {id:0,name:"ノーマル",price:20,speed:6,rate:400,color:"white"},
+ {id:1,name:"スピード",price:40,speed:8,rate:400,color:"cyan"},
+ {id:2,name:"ラピッド",price:80,speed:6,rate:200,color:"yellow"},
+ {id:3,name:"ヘビー",price:160,speed:4,rate:500,color:"orange"},
+ {id:4,name:"スナイプ",price:320,speed:10,rate:800,color:"red"},
+ {id:5,name:"ツイン",price:640,speed:6,rate:300,color:"lime"},
+ {id:6,name:"バースト",price:1280,speed:7,rate:600,color:"pink"},
+ {id:7,name:"レーザー",price:2560,speed:12,rate:700,color:"violet"},
+ {id:8,name:"カオス",price:5120,speed:9,rate:150,color:"gold"},
+ {id:9,name:"ゴッド",price:10240,speed:14,rate:100,color:"aqua"}
+];
+
+function getPoint(){return Number(localStorage.getItem("point")||0);}
+function setPoint(p){localStorage.setItem("point",p);}
+function getGun(){return Number(localStorage.getItem("gun")||0);}
+function setGun(id){localStorage.setItem("gun",id);}
+</script>
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><title>Shop</title></head>
+<body style="background:#111;color:white;font-family:sans-serif">
+<h2>銃ショップ</h2>
+<p id="p"></p>
+<div id="list"></div>
+<script src="common.js"></script>
+<script>
+p.textContent="ポイント："+getPoint();
+guns.forEach(g=>{
+ const b=document.createElement("button");
+ b.textContent=`${g.name} (${g.price}p)`;
+ b.onclick=()=>{
+  let pt=getPoint();
+  if(pt>=g.price){
+    setPoint(pt-g.price);
+    setGun(g.id);
+    alert("購入！");
+    location.reload();
+  }else alert("ポイント不足");
+ };
+ list.appendChild(b);
+ list.appendChild(document.createElement("br"));
+});
+</script>
+</body></html>
+// ヒット時
+point += 5;
+
+// 勝ち
+point += 10;
+
+// 負け
+point += 5;
+
+localStorage.setItem("point", point);
+const gun = guns[getGun()];
+bullets.push({x:me.x,y:me.y,speed:gun.speed,color:gun.color});
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><title>Typing</title></head>
+<body style="background:#000;color:white;text-align:center">
+<h2>タイピング</h2>
+<p id="q"></p>
+<input id="i" autofocus>
+<p id="s"></p>
+
+<script>
+const words=["sakura","nihon","gakkou","tokyo","sensei","kuruma","densha","kaze","yama","umi"];
+let idx=0,miss=0;
+q.textContent=words[idx];
+
+i.oninput=()=>{
+ if(words[idx].startsWith(i.value)) return;
+ miss++; i.value="";
+ if(miss>=5){alert("ゲームオーバー");location.href="index.html";}
+};
+
+i.onkeydown=e=>{
+ if(e.key==="Enter"){
+  if(i.value===words[idx]){
+    idx++; i.value="";
+    if(idx>=10){alert("クリア！");location.href="index.html";}
+    q.textContent=words[idx];
+  }
+ }
+};
+</script>
+</body></html>
+<button onclick="location.href='shop.html'">銃を購入</button>
+<button onclick="location.href='typing.html'">一人で</button>
+<button onclick="startMatch()">ランダムマッチ</button>
